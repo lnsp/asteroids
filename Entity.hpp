@@ -8,6 +8,7 @@ class Entity {
 	sf::Texture* texture;
 protected:
 	void loadTexture(std::string file);
+	void move(float delta);
 public:
 	Entity(sf::Vector2f& position);
 	Entity() {};

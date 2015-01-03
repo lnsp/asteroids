@@ -8,11 +8,12 @@
 #include "ResourceManager.hpp"
 
 ResourceManager resourceManager;
-const unsigned int		WINDOW_WIDTH = 800,
-						WINDOW_HEIGHT = 600;
-const sf::Keyboard::Key ROTATE_LEFT_KEY = sf::Keyboard::A,
-						ROTATE_RIGHT_KEY = sf::Keyboard::D,
-						ACCELERATE_KEY = sf::Keyboard::Space;
+const unsigned int		WINDOW_WIDTH		= 1280,
+						WINDOW_HEIGHT		= 720;
+const sf::Keyboard::Key ROTATE_LEFT_KEY		= sf::Keyboard::A,
+						ROTATE_RIGHT_KEY	= sf::Keyboard::D,
+						ACCELERATE_KEY		= sf::Keyboard::Space,
+						SHOOT_KEY			= sf::Keyboard::P;
 
 int main()
 {
@@ -33,14 +34,15 @@ int main()
 
 	// meteor vector
 	std::vector<Meteor> meteors;
+	// projectile vector
+	std::vector<Projectile> projectiles;
 
 	// create delta timing clock
 	Clock gameClock;
-	Time lastTime	= gameClock.getElapsedTime();
-	Time lastMeteor = gameClock.getElapsedTime();
+	Time lastTime			= gameClock.getElapsedTime();
 
 	// key controls
-	bool accelerateKeyDown = false, rotateLeftKeyDown = false, rotateRightKeyDown = false;
+	bool accelerateKeyDown = false, rotateLeftKeyDown = false, rotateRightKeyDown = false, shootKeyDown = false;
 
 	while (window.isOpen()) {
 		Event windowEvent;
@@ -54,76 +56,64 @@ int main()
 				bool state = windowEvent.type == Event::KeyPressed;
 				switch (windowEvent.key.code) {
 				case ACCELERATE_KEY:
-					accelerateKeyDown = state;
+					accelerateKeyDown	= state;
 					break;
 				case ROTATE_LEFT_KEY:
-					rotateLeftKeyDown = state;
+					rotateLeftKeyDown	= state;
 					break;
 				case ROTATE_RIGHT_KEY:
-					rotateRightKeyDown = state;
+					rotateRightKeyDown	= state;
 					break;
+				case SHOOT_KEY:
+					shootKeyDown		= state;
 				}
 			}
 		}
 		window.clear();
 
 		// calculate delta time
-		Time elapsedTime = gameClock.getElapsedTime();
-		Time deltaTime = elapsedTime - lastTime;
-		lastTime = elapsedTime;
-		float delta = deltaTime.asSeconds();
-		
-		// spawn meteor
-		Time distanceTime = elapsedTime - lastMeteor;
-		if (distanceTime.asSeconds() > 2) {
-			lastMeteor = elapsedTime;
-
-			// generate random position outside the window
-			float angle = rand() % 360 * 180 / 3.14f;
-			Vector2f meteorPosition{ cos(angle) * WINDOW_WIDTH, sin(angle) * WINDOW_HEIGHT };
-
-			// calculate direction to throw it to the player
-			Vector2f playerPosition = player.getPosition();
-			Vector2f direction = playerPosition - meteorPosition;
-
-			// vector to angle
-			float rotation = atan2(direction.y, direction.x) * 180/3.14f;
-			std::cout << rotation << std::endl;
-
-			// create object and append it to the vector
-			Meteor m{ meteorPosition };
-			m.setSpeed(rand() % 30 + 80);
-			m.setRotation(rotation);
-			meteors.push_back(m);
-
-			//TODO: Remove debug msg
-			std::cout << "meteor spawned at " << meteorPosition.x << "; " << meteorPosition.y << std::endl;
-		}
+		Time elapsedTime	= gameClock.getElapsedTime();
+		Time deltaTime		= elapsedTime - lastTime;
+		lastTime			= elapsedTime;
+		float delta			= deltaTime.asSeconds();
 
 		// handle keys
 		if (rotateLeftKeyDown) {
-			player.rotateLeft(delta); // 45 deg per s
+			player.rotateLeft(delta);
 		}
 		else if (rotateRightKeyDown) {
-			player.rotateRight(delta); // 45 deg per s
+			player.rotateRight(delta);
 		}
 		if (accelerateKeyDown) {
 			player.accelerate(1.05f); // accelerate a bit
+		}
+		if (shootKeyDown) {
+			player.shoot(projectiles, elapsedTime);
 		}
 
 		// update player
 		player.update(delta);
 
+		// spawn meteors
+		Meteor::spawn(meteors, player.getPosition(), elapsedTime, 800);
+
 		// keep player inside window
-		player.restrictToBounds(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+		player.restrictToBounds(0.0f, 0.0f, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
+
 
 		// draw meteors on screen
 		for (auto& asteroid : meteors) {
 			asteroid.update(delta);
 			asteroid.draw(window);
 		}
+
 		// draw player on screen
 		player.draw(window);
+		// draw projectiles on screen
+		for (auto& shot : projectiles) {
+			shot.update(delta);
+			shot.draw(window);
+		}
 		
 		// switch buffers for double-buffering
 		window.display();

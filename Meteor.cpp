@@ -1,14 +1,36 @@
 #include "Meteor.hpp"
 
+sf::Time Meteor::lastMeteorSpawn;
+
 void Meteor::init() {
 	loadTexture("meteor_big.png");
 }
 
 void Meteor::update(float delta) {
-	getPosition() += delta * getSpeed() * sf::Vector2f{ cos(getRotation() * 3.14159265359f / 180), sin(getRotation() * 3.14159265359f / 180) };
-	/* ------------------------------------------------------------
-			UNCOMMENT THIS FOR DRUNKEN METEORS
-	---------------------------------------------------------------*/
-	int sgn = getRotation() >= 0 ? 1 : -1;
-	setRotation(getRotation() + delta * sgn * getSpeed() / 10);
+	move(delta);
+}
+void Meteor::spawn(std::vector<Meteor>& gameMeteors, sf::Vector2f& playerPosition, sf::Time& gameTime, float radius) {
+	sf::Time distanceTime = gameTime - Meteor::lastMeteorSpawn;
+	
+	if (distanceTime.asSeconds() > 2) {
+		Meteor::lastMeteorSpawn = gameTime;
+
+		// generate random position outside the window
+		float angle = rand() % 360 * 180 / 3.14f;
+		sf::Vector2f meteorPosition{ cos(angle) * radius + playerPosition.x, sin(angle) * radius + playerPosition.y};
+
+		// calculate direction to throw it to the player
+		sf::Vector2f direction = playerPosition - meteorPosition;
+
+		// vector to angle
+		float rotation = atan2(direction.y, direction.x) * 180 / 3.14f;
+
+		// create object and append it to the vector
+		Meteor m{ meteorPosition };
+
+		// generate random speed between 150 and 199
+		m.setSpeed(rand() % 50 + 150.0f);
+		m.setRotation(rotation);
+		gameMeteors.push_back(m);
+	}
 }

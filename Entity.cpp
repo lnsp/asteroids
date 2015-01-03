@@ -6,6 +6,9 @@ extern ResourceManager resourceManager;
 Entity::Entity(sf::Vector2f& position) {
 	this->position = position;
 }
+void Entity::move(float delta) {
+	getPosition() += delta * getSpeed() * sf::Vector2f{ cos(getRotation() * 3.14159265359f / 180), sin(getRotation() * 3.14159265359f / 180) };
+}
 sf::Vector2f& Entity::getPosition() {
 	return position;
 }
@@ -35,5 +38,5 @@ void Entity::setSpeed(float speed) {
 void Entity::loadTexture(std::string file) {
 	texture = resourceManager.get(file);
 	shape.setTexture(*texture);
-	shape.setOrigin(texture->getSize().x / 2, texture->getSize().y / 2);
+	shape.setOrigin(texture->getSize().x / 2.0f, texture->getSize().y / 2.0f);
 }
