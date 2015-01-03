@@ -1,13 +1,18 @@
-#include <SFML/Graphics.hpp>
-#include "Player.hpp"
-#include "Meteor.hpp"
-#include "ResourceManager.hpp"
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <SFML/Graphics.hpp>
 
-ResourceManager rm;
-const unsigned int WINDOW_WIDTH = 800, WINDOW_HEIGHT = 600;
+#include "Player.hpp"
+#include "Meteor.hpp"
+#include "ResourceManager.hpp"
+
+ResourceManager resourceManager;
+const unsigned int		WINDOW_WIDTH = 800,
+						WINDOW_HEIGHT = 600;
+const sf::Keyboard::Key ROTATE_LEFT_KEY = sf::Keyboard::A,
+						ROTATE_RIGHT_KEY = sf::Keyboard::D,
+						ACCELERATE_KEY = sf::Keyboard::Space;
 
 int main()
 {
@@ -17,8 +22,10 @@ int main()
 	RenderWindow window{ VideoMode{ WINDOW_WIDTH, WINDOW_HEIGHT }, "Asteroids", Style::Default, ContextSettings{ 16, 16, 16, 2, 0 } };
 	window.setVerticalSyncEnabled(true);
 
-	rm.load("player.png");
-	rm.load("meteor_big.png");
+	// load resources
+	resourceManager.load("player.png");
+	resourceManager.load("meteor_big.png");
+	resourceManager.load("laser.png");
 
 	// create player object
 	Player player{ Vector2f{ WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 } };
@@ -28,12 +35,12 @@ int main()
 	std::vector<Meteor> meteors;
 
 	// create delta timing clock
-	Clock clock;
-	Time lastTime = clock.getElapsedTime();
-	Time lastMeteor = clock.getElapsedTime();
+	Clock gameClock;
+	Time lastTime	= gameClock.getElapsedTime();
+	Time lastMeteor = gameClock.getElapsedTime();
 
 	// key controls
-	bool spaceDown = false, leftDown = false, rightDown = false;
+	bool accelerateKeyDown = false, rotateLeftKeyDown = false, rotateRightKeyDown = false;
 
 	while (window.isOpen()) {
 		Event windowEvent;
@@ -43,30 +50,17 @@ int main()
 				window.close();
 			}
 			// handling shoot, rotate right and left key events
-			else if (windowEvent.type == Event::KeyReleased) {
+			else if (windowEvent.type == Event::KeyReleased || windowEvent.type == Event::KeyPressed) {
+				bool state = windowEvent.type == Event::KeyPressed;
 				switch (windowEvent.key.code) {
-				case Keyboard::Space:
-					spaceDown = false;
+				case ACCELERATE_KEY:
+					accelerateKeyDown = state;
 					break;
-				case Keyboard::A:
-					leftDown = false;
+				case ROTATE_LEFT_KEY:
+					rotateLeftKeyDown = state;
 					break;
-				case Keyboard::D:
-					rightDown = false;
-					break;
-				}
-				std::cout << "Key " << windowEvent.key.code << " released" << std::endl;
-			}
-			else if (windowEvent.type == Event::KeyPressed) {
-				switch (windowEvent.key.code) {
-				case Keyboard::Space:
-					spaceDown = true;
-					break;
-				case Keyboard::A:
-					leftDown = true;
-					break;
-				case Keyboard::D:
-					rightDown = true;
+				case ROTATE_RIGHT_KEY:
+					rotateRightKeyDown = state;
 					break;
 				}
 			}
@@ -74,7 +68,7 @@ int main()
 		window.clear();
 
 		// calculate delta time
-		Time elapsedTime = clock.getElapsedTime();
+		Time elapsedTime = gameClock.getElapsedTime();
 		Time deltaTime = elapsedTime - lastTime;
 		lastTime = elapsedTime;
 		float delta = deltaTime.asSeconds();
@@ -84,38 +78,45 @@ int main()
 		if (distanceTime.asSeconds() > 2) {
 			lastMeteor = elapsedTime;
 
-			// randomly calculated position outside the window
+			// generate random position outside the window
 			float angle = rand() % 360 * 180 / 3.14f;
 			Vector2f meteorPosition{ cos(angle) * WINDOW_WIDTH, sin(angle) * WINDOW_HEIGHT };
-			//Vector2f meteorPosition{ 400, 500 };
-			// calculate direction
+
+			// calculate direction to throw it to the player
 			Vector2f playerPosition = player.getPosition();
 			Vector2f direction = playerPosition - meteorPosition;
 
-			std::cout << direction.x << " " << direction.y << std::endl;
-
+			// vector to angle
 			float rotation = atan2(direction.y, direction.x) * 180/3.14f;
 			std::cout << rotation << std::endl;
 
+			// create object and append it to the vector
 			Meteor m{ meteorPosition };
 			m.setSpeed(rand() % 30 + 80);
 			m.setRotation(rotation);
 			meteors.push_back(m);
+
+			//TODO: Remove debug msg
+			std::cout << "meteor spawned at " << meteorPosition.x << "; " << meteorPosition.y << std::endl;
 		}
 
 		// handle keys
-		if (leftDown) {
+		if (rotateLeftKeyDown) {
 			player.rotateLeft(delta); // 45 deg per s
 		}
-		else if (rightDown) {
+		else if (rotateRightKeyDown) {
 			player.rotateRight(delta); // 45 deg per s
 		}
-		if (spaceDown) {
+		if (accelerateKeyDown) {
 			player.accelerate(1.05f); // accelerate a bit
 		}
 
 		// update player
 		player.update(delta);
+
+		// keep player inside window
+		player.restrictToBounds(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
 		// draw meteors on screen
 		for (auto& asteroid : meteors) {
 			asteroid.update(delta);
@@ -123,8 +124,8 @@ int main()
 		}
 		// draw player on screen
 		player.draw(window);
-
 		
+		// switch buffers for double-buffering
 		window.display();
 	}
 	return 0;

@@ -4,9 +4,10 @@
 class Entity {
 	float rotation = 0, speed = 0;
 	sf::Vector2f position{ 0, 0 };
-protected:
 	sf::Sprite shape;
 	sf::Texture* texture;
+protected:
+	void loadTexture(std::string file);
 public:
 	Entity(sf::Vector2f& position);
 	Entity() {};

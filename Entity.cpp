@@ -1,4 +1,7 @@
 #include "Entity.hpp"
+#include "ResourceManager.hpp"
+
+extern ResourceManager resourceManager;
 
 Entity::Entity(sf::Vector2f& position) {
 	this->position = position;
@@ -28,4 +31,9 @@ float Entity::getSpeed() {
 }
 void Entity::setSpeed(float speed) {
 	this->speed = speed;
+}
+void Entity::loadTexture(std::string file) {
+	texture = resourceManager.get(file);
+	shape.setTexture(*texture);
+	shape.setOrigin(texture->getSize().x / 2, texture->getSize().y / 2);
 }
