@@ -15,6 +15,5 @@ public:
 	void accelerate(float amount);
 	void rotateLeft(float delta);
 	void rotateRight(float delta);
-	void restrictToBounds(float x, float y, float width, float height);
 	void shoot(std::vector<Projectile>& gameProjectiles, sf::Time& gameTime);
 };

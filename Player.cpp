@@ -22,12 +22,6 @@ void Player::rotateRight(float delta) {
 	// rotate faster when more speed
 	rotate((40) * delta);
 }
-void Player::restrictToBounds(float x, float y, float width, float height) {
-	if (getPosition().x > x + width)	getPosition().x = x;
-	if (getPosition().x < x)			getPosition().x = x + width;
-	if (getPosition().y > y + width)	getPosition().y = y;
-	if (getPosition().y < y)			getPosition().y = y + width;
-}
 void Player::shoot(std::vector<Projectile> &gameProjectiles, sf::Time &gameTime) {
 	sf::Time distanceTime = gameTime - lastProjectile;
 

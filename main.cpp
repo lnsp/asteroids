@@ -100,18 +100,29 @@ int main()
 		// keep player inside window
 		player.restrictToBounds(0.0f, 0.0f, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
 
-
 		// draw meteors on screen
 		for (auto& asteroid : meteors) {
 			asteroid.update(delta);
+			asteroid.restrictToBounds(-200.0f, -200.0f, float(WINDOW_WIDTH + 200), float(WINDOW_HEIGHT + 200));
 			asteroid.draw(window);
 		}
 
 		// draw player on screen
 		player.draw(window);
+
+		// update projectiles
+		for (auto projIt = projectiles.begin(); projIt != projectiles.end(); ++projIt) {
+			if (projIt->update(delta, meteors)) {
+				projectiles.erase(projIt);
+				break;
+			}
+			else {
+				projIt->restrictToBounds(-100.f, -100.f, float(WINDOW_WIDTH + 100), float(WINDOW_HEIGHT + 100));
+			}
+		}
+
 		// draw projectiles on screen
 		for (auto& shot : projectiles) {
-			shot.update(delta);
 			shot.draw(window);
 		}
 		

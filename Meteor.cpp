@@ -1,6 +1,7 @@
 #include "Meteor.hpp"
 
 sf::Time Meteor::lastMeteorSpawn;
+float Meteor::spawning_rate = 3.0f;
 
 void Meteor::init() {
 	loadTexture("meteor_big.png");
@@ -29,8 +30,10 @@ void Meteor::spawn(std::vector<Meteor>& gameMeteors, sf::Vector2f& playerPositio
 		Meteor m{ meteorPosition };
 
 		// generate random speed between 150 and 199
-		m.setSpeed(rand() % 50 + 150.0f);
+		m.setSpeed(rand() % 50 + 50);
 		m.setRotation(rotation);
 		gameMeteors.push_back(m);
+
+		spawning_rate += 0.5f;
 	}
 }

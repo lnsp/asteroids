@@ -3,7 +3,7 @@
 #pragma once
 
 class Meteor : public Entity {
-	const float SPAWNING_RATE = 1.5f;
+	static float spawning_rate;
 	void init();
 	static sf::Time lastMeteorSpawn;
 public:
