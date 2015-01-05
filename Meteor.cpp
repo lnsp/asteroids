@@ -33,7 +33,5 @@ void Meteor::spawn(std::vector<Meteor>& gameMeteors, sf::Vector2f& playerPositio
 		m.setSpeed(rand() % 50 + 50);
 		m.setRotation(rotation);
 		gameMeteors.push_back(m);
-
-		spawning_rate += 0.5f;
 	}
 }

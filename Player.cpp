@@ -4,10 +4,33 @@
 void Player::init() {
 	loadTexture("player.png");
 }
-void Player::update(float delta) {
+bool Player::isDead() {
+	return dead;
+}
+int Player::getMaxHP() {
+	return MAX_HP;
+}
+int Player::getHP() {
+	return hp;
+}
+void Player::resetHP() {
+	hp = MAX_HP;
+	dead = false;
+}
+void Player::update(float delta, std::vector<Meteor>& meteors) {
 	// simulate movement here - using  a direction vector
 	move(delta);
 	setSpeed(getSpeed() * (0.999f - delta));
+
+	for (auto it = meteors.begin(); it != meteors.end(); ++it) {
+		if (it->getBoundingBox().intersects(getBoundingBox())) {
+			if (--hp <= 0) {
+				dead = true;
+			}
+			meteors.erase(it);
+			break;
+		}
+	}
 }
 void Player::accelerate(float amount) {
 	// accelerate spaceship

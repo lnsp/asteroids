@@ -3,10 +3,10 @@
 #pragma once
 
 class Meteor : public Entity {
-	static float spawning_rate;
 	void init();
 	static sf::Time lastMeteorSpawn;
 public:
+	static float spawning_rate;
 	Meteor(sf::Vector2f& position) : Entity(position) { init(); }
 	Meteor() : Entity() { init(); };
 	void update(float delta);
