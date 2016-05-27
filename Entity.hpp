@@ -1,4 +1,4 @@
-#include "SFML\Graphics.hpp"
+#include <SFML/Graphics.hpp>
 #pragma once
 
 class Entity {
@@ -23,5 +23,5 @@ public:
 	void draw(sf::RenderWindow& screen, bool drawBoundingBox);
 	void restrictToBounds(float x, float y, float width, float height);
 	void update(float delta);
-	sf::FloatRect Entity::getBoundingBox();
+	sf::FloatRect getBoundingBox();
 };

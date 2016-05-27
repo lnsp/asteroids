@@ -31,7 +31,8 @@ int main()
 	resourceManager.load("laser.png");
 
 	// create player object
-	Player player{ Vector2f{ WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 } };
+	Vector2f centerPosition = { WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 };
+	Player player { centerPosition };
 	player.setRotation(0);
 
 	// meteor vector
@@ -151,7 +152,8 @@ int main()
 				meteors.clear();
 				projectiles.clear();
 				Meteor::spawning_rate = 1.0f;
-				player.setPosition(Vector2f{ WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f });
+				Vector2f resetPosition = { WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 };
+				player.setPosition(resetPosition);
 				playerScore = 0;
 				player.resetHP();
 			}
